@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 
-import VueI18n from '@intlify/unplugin-vue-i18n/vite';
+import VueI18n from '@intlify/unplugin-vue-i18n/vite';// 这里保持默认导入
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import Unocss from 'unocss/vite';
@@ -16,6 +16,7 @@ import markdown from 'vite-plugin-vue-markdown';
 import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
 
+// eslint-disable-next-line n/prefer-global/process
 const baseUrl = process.env.BASE_URL ?? '/';
 
 // https://vitejs.dev/config/
@@ -57,8 +58,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       strategies: 'generateSW',
       manifest: {
-        name: 'IT Tools',
-        description: 'Aggregated set of useful tools for developers.',
+        name: '出海建站在线工具箱 - 888467.xyz',
+        short_name: '888467工具箱',
+        description: '专为出海建站打造的在线开发者工具集合',
         display: 'standalone',
         lang: 'fr-FR',
         start_url: `${baseUrl}?utm_source=pwa&utm_medium=pwa`,

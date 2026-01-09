@@ -3,10 +3,13 @@ import { get } from '@vueuse/core';
 import type { Plugin } from 'vue';
 import { createI18n } from 'vue-i18n';
 
-const i18n = createI18n({
+export const i18n = createI18n({
   legacy: false,
-  locale: 'en',
+  // 优先使用 'zh'，或者保留 localStorage 逻辑但把默认值改为 'zh'
+  locale: localStorage.getItem('locale') || 'zh',
+  fallbackLocale: 'en', // 备用语言可以保留为英文
   messages,
+  // ...
 });
 
 export const i18nPlugin: Plugin = {
