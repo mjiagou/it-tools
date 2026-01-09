@@ -61,9 +61,9 @@ const tools = computed<ToolCategory[]>(() => [
 
         <div class="footer">
           <div>
-            888467.xyz
+            IT-Tools
 
-            <c-link target="_blank" rel="noopener nofollow" :href="`https://github.com/CorentinTh/it-tools/tree/v${version}`">
+            <c-link target="_blank" rel="noopener" :href="`https://github.com/CorentinTh/it-tools/tree/v${version}`">
               v{{ version }}
             </c-link>
 
@@ -71,7 +71,7 @@ const tools = computed<ToolCategory[]>(() => [
               -
               <c-link
                 target="_blank"
-                rel="noopener nofollow"
+                rel="noopener"
                 type="primary"
                 :href="`https://github.com/CorentinTh/it-tools/tree/${commitSha}`"
               >
@@ -81,7 +81,7 @@ const tools = computed<ToolCategory[]>(() => [
           </div>
           <div>
             © {{ new Date().getFullYear() }}
-            <c-link target="_blank" rel="noopener nofollow" href="https://corentin.tech?utm_source=it-tools&utm_medium=footer">
+            <c-link target="_blank" rel="noopener" href="https://corentin.tech?utm_source=it-tools&utm_medium=footer">
               Corentin Thomasset
             </c-link>
           </div>
@@ -124,7 +124,7 @@ const tools = computed<ToolCategory[]>(() => [
           <c-button
             round
             href="https://www.buymeacoffee.com/cthmsst"
-            rel="noopener nofollow"
+            rel="noopener"
             target="_blank"
             class="support-button"
             :bordered="false"
