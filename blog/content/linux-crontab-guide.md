@@ -1,6 +1,6 @@
 ---
 title: "Linux Crontab 表达式生成与反解析完全指南"
-date: 2026-01-10T10:00:00+08:00
+date: 2026-01-10
 slug: "linux-crontab-guide"
 draft: false
 tags: ["Linux", "运维", "Crontab", "效率工具"]
