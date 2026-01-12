@@ -36,7 +36,7 @@ onMounted(async () => {
         .slice()
         .sort((a: Article, b: Article) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 4)
-        .map((p: Article) => ({ ...p, link: `/blog/${p.slug}` }));
+        .map((p: Article) => ({ ...p, link: `/blog/${p.slug}/` }));
     }
   } catch (e) {
     console.warn('Failed to load blog posts:', e);
