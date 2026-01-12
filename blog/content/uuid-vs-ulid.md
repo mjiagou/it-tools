@@ -1,7 +1,7 @@
 ---
 title: "UUID vs ULID：下一代分布式主键该选谁？"
 date: "2026-01-10T16:00:00+08:00"
-slug: "uuid-vs-ulid-guide"
+slug: "uuid-vs-ulid"
 draft: false
 tags: ["架构设计", "数据库", "UUID", "ULID"]
 categories: ["开发指南"]
