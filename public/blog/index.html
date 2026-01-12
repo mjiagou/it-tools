@@ -46,7 +46,14 @@
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-        cursor: pointer;
+      }
+      .card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      .card-link:hover .card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
       .card img {
         width: 100%;
@@ -94,18 +101,20 @@
             listEl.innerHTML = arr
               .map(
                 (p) => `
-            <div class="card" onclick="location.href='./${p.slug}/'">
-              <img src="${p.image}" alt="" />
-              <div class="card-content">
-                <div class="card-title">${p.title}</div>
-                <div class="card-excerpt">${p.excerpt}</div>
-                <div class="post-meta">
-                  <span>${p.date}</span>${
-                    p.tags && p.tags.length ? `<span style="margin-left:12px">${p.tags.join(', ')}</span>` : ''
-                  }
+            <a href="./${p.slug}/" class="card-link">
+              <div class="card">
+                <img src="${p.image}" alt="" />
+                <div class="card-content">
+                  <div class="card-title">${p.title}</div>
+                  <div class="card-excerpt">${p.excerpt}</div>
+                  <div class="post-meta">
+                    <span>${p.date}</span>${
+                      p.tags && p.tags.length ? `<span style="margin-left:12px">${p.tags.join(', ')}</span>` : ''
+                    }
+                  </div>
                 </div>
               </div>
-            </div>`,
+            </a>`,
               )
               .join('');
           }
