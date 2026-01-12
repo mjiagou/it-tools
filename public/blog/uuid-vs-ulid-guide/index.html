@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UUID vs ULID：下一代分布式主键该选谁？ - Blog - 888467.xyz</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Arial,sans-serif;margin:0;padding:0;background:#f7f7f7;color:#333;max-width:800px;margin:40px auto;line-height:1.6;}
+    h1,h2,h3,h4,h5,h6{margin-top:1.5em;margin-bottom:0.8em;}
+    a{color:#2563eb;}
+    pre{background:#f1f5f9;border-radius:8px;padding:1em;overflow-x:auto;}
+    code{background:#e5e7eb;padding:2px 5px;border-radius:4px;}
+    .meta{font-size:0.9em;color:#888;margin-bottom:2em;}
+    .tags{margin-top:2em;}
+    .tag{display:inline-block;background:#e5e7eb;padding:4px 8px;border-radius:4px;margin-right:6px;font-size:0.8em;}
+    .back-link{margin-bottom:2em;}
+  </style>
+</head>
+<body>
+  <a href="../" class="back-link">← 返回博客首页</a>
+  <h1>UUID vs ULID：下一代分布式主键该选谁？</h1>
+  <div class="meta">
+    <span>2026-01-10T16:00:00+08:00</span>
+    <span> · 标签: 架构设计, 数据库, UUID, ULID</span>
+  </div>
+  <div><p>在分布式系统设计中，生成全局唯一的 ID 是最基础的需求。多年来，<strong>UUID (Universally Unique Identifier)</strong> 一直是事实上的标准。</p>
+<p>但随着数据量的爆炸，UUID 在数据库性能上的短板逐渐暴露，而 <strong>ULID (Universally Unique Lexicographically Sortable Identifier)</strong> 作为后起之秀，正在被越来越多的新项目采用。</p>
+<p>本文将深入对比两者的优劣，帮你决定谁才是你的“真命天子”。</p>
+<h2>UUID：老当益壮的标准</h2>
+<p>UUID (v4) 是由 32 个十六进制数字组成的字符串，通常用连字符分为五组。</p>
+<ul>
+<li><strong>示例</strong>：<code>f47ac10b-58cc-4372-a567-0e02b2c3d479</code></li>
+<li><strong>工具</strong>：<a href="https://888467.xyz/uuid-generator">在线 UUID 生成器</a></li>
+</ul>
+<h3>优点</h3>
+<ol>
+<li><strong>绝对标准</strong>：几乎所有编程语言和数据库都内置支持。</li>
+<li><strong>安全性</strong>：v4 版本完全随机，无法从中推测出生成时间或机器信息。</li>
+</ol>
+<h3>缺点</h3>
+<ol>
+<li><strong>无序性（致命伤）</strong>：UUID v4 是完全随机的。如果用作数据库主键（Primary Key），每次插入数据都会导致 B+ 树索引的<strong>大量随机 IO 和页分裂</strong>，严重拖慢写入性能。</li>
+<li><strong>体积大</strong>：128 位，通常以 36 字符的字符串存储，浪费空间。</li>
+</ol>
+<h2>ULID：为数据库而生</h2>
+<p>ULID 设计之初就是为了解决 UUID 的无序问题。它由 26 个字符组成（Base32 编码）。</p>
+<ul>
+<li><strong>示例</strong>：<code>01ARZ3NDEKTSV4RRFFQ69G5FAV</code></li>
+<li><strong>工具</strong>：<a href="https://888467.xyz/ulid-generator">在线 ULID 生成器</a></li>
+</ul>
+<h3>结构揭秘</h3>
+<p>ULID = <strong>48位时间戳</strong> + <strong>80位随机数</strong></p>
+<h3>优点</h3>
+<ol>
+<li><strong>按字典序排序</strong>：这是它最大的杀手锏。由于前 48 位是时间戳，生成的 ID 是<strong>单调递增</strong>的。这使得数据库在插入新数据时，只需要在索引树的末尾追加，极大提升了写入性能。</li>
+<li><strong>不包含连字符</strong>：URL 安全，且比 UUID 短（26 vs 36 字符）。</li>
+<li><strong>兼容性</strong>：本质上依然是 128 位，可以无缝转换成 UUID 格式存储。</li>
+</ol>
+<h2>选型建议</h2>
+<table>
+<thead>
+<tr>
+<th align="left">维度</th>
+<th align="left">UUID (v4)</th>
+<th align="left">ULID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>有序性</strong></td>
+<td align="left">无序 (Random)</td>
+<td align="left"><strong>有序 (Sorted)</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>索引性能</strong></td>
+<td align="left">差 (随机 IO)</td>
+<td align="left"><strong>优 (顺序 IO)</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>安全性</strong></td>
+<td align="left">高 (不暴露时间)</td>
+<td align="left">中 (暴露生成时间)</td>
+</tr>
+<tr>
+<td align="left"><strong>长度</strong></td>
+<td align="left">36 字符</td>
+<td align="left">26 字符</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>选择 ULID</strong>：如果你需要用作<strong>数据库主键</strong>，或者需要对 ID 进行<strong>时间排序</strong>。</li>
+<li><strong>选择 UUID</strong>：如果你需要<strong>极高的安全性</strong>（不想让别人通过 ID 猜出数据创建时间），或者在维护<strong>遗留系统</strong>。</li>
+</ul>
+<blockquote>
+<p><strong>动手试一试</strong>：</p>
+<ul>
+<li>👉 生成一个标准的 <a href="https://888467.xyz/uuid-generator">UUID</a></li>
+<li>👉 生成一个可排序的 <a href="https://888467.xyz/ulid-generator">ULID</a></li>
+</ul>
+</blockquote>
+</div>
+  
+  <div class="tags">
+    <span class="tag">架构设计</span><span class="tag">数据库</span><span class="tag">UUID</span><span class="tag">ULID</span>
+  </div>
+</body>
+</html>

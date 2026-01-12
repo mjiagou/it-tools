@@ -22,6 +22,19 @@
     "image": "https://picsum.photos/seed/my-set-post/600/360"
   },
   {
+    "slug": "uuid-vs-ulid-guide",
+    "title": "UUID vs ULID：下一代分布式主键该选谁？",
+    "date": "2026-01-10T16:00:00+08:00",
+    "excerpt": "",
+    "tags": [
+      "架构设计",
+      "数据库",
+      "UUID",
+      "ULID"
+    ],
+    "image": "https://picsum.photos/seed/uuid-vs-ulid-guide/600/360"
+  },
+  {
     "slug": "vue-tips",
     "title": "Vue 3 实用技巧",
     "date": "2025-01-11T00:00:00.000Z",
