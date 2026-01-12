@@ -54,4 +54,4 @@ response = requests.post('https://api.example.com/users', headers=headers, json=
 2. **快速学习**：如果你刚接触一门新语言（比如 Rust），通过对比 Curl 和生成的代码，是学习它 HTTP 库的最快方式。
 3. **节省时间**：把机械的翻译工作交给机器，留出时间思考业务逻辑。
 
-> **立即使用**：🚀 **[Curl 在线转代码工具](./curl-converter)**
+> **立即使用**：🚀 **[Curl 在线转代码工具](/curl-converter)**
