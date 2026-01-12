@@ -1,13 +1,16 @@
 <script setup lang="ts">
 const props = defineProps<{
-  article: { title: string; excerpt: string; image?: string; link?: string; tags?: string[] }
+  article: { title: string; excerpt: string; description?: string; image?: string; link?: string; tags?: string[] };
 }>();
 const { article } = toRefs(props);
 </script>
 
 <template>
-  <c-card class="h-full transition transition-duration-0.5s !border-2px !hover:border-primary">
-    <img v-if="article.image" :src="article.image" alt="" class="h-40 w-full object-cover">
+  <c-card
+    :description="article.description"
+    class="h-full transition transition-duration-0.5s !border-2px !hover:border-primary"
+  >
+    <img v-if="article.image" :src="article.image" alt="" class="h-40 w-full object-cover" />
     <div class="p-3">
       <a :href="article.link || '#'" class="decoration-none">
         <div class="mt-2 truncate text-lg text-black font-semibold dark:text-white hover:text-primary">

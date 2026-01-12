@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux Crontab 表达式生成与反解析完全指南 - Blog - 888467.xyz</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Arial,sans-serif;margin:0;padding:0;background:#f7f7f7;color:#333;max-width:800px;margin:40px auto;line-height:1.6;}
+    h1,h2,h3,h4,h5,h6{margin-top:1.5em;margin-bottom:0.8em;}
+    a{color:#2563eb;}
+    pre{background:#f1f5f9;border-radius:8px;padding:1em;overflow-x:auto;}
+    code{background:#e5e7eb;padding:2px 5px;border-radius:4px;}
+    .meta{font-size:0.9em;color:#888;margin-bottom:2em;}
+    .tags{margin-top:2em;}
+    .tag{display:inline-block;background:#e5e7eb;padding:4px 8px;border-radius:4px;margin-right:6px;font-size:0.8em;}
+    .back-link{margin-bottom:2em;}
+  </style>
+</head>
+<body>
+  <a href="../" class="back-link">← 返回博客首页</a>
+  <h1>Linux Crontab 表达式生成与反解析完全指南</h1>
+  <div class="meta">
+    <span>Sat Jan 10 2026 10:00:00 GMT+0800 (中国标准时间)</span>
+    <span> · 标签: Linux, 运维, Crontab, 效率工具</span>
+  </div>
+  <div><p>在 Linux 服务器维护和后端开发中，<code>Crontab</code> 是管理定时任务的标准方式。但说实话，除了那几个最常用的，谁能每次都准确无误地写出那个由 5 个星号组成的表达式？</p>
+<p><code>* * * * *</code> —— 到底哪个是“分”，哪个是“周”？<code>0 0 1,15 * 1</code> 到底是在每月的 1 号还是每周的周一执行？</p>
+<p>如果你也经常需要去翻文档或者问 AI，那么我们提供的 <strong><a href="https://888467.xyz/crontab-generator">Crontab 生成器</a></strong> 将是你的最佳助手。</p>
+<h2>痛点：为什么 Cron 这么难记？</h2>
+<p>标准的 Crontab 语法包含 5 个字段（有时是 6 个，包含秒）：</p>
+<ol>
+<li><strong>Minute</strong> (0-59)</li>
+<li><strong>Hour</strong> (0-23)</li>
+<li><strong>Day of Month</strong> (1-31)</li>
+<li><strong>Month</strong> (1-12)</li>
+<li><strong>Day of Week</strong> (0-6)</li>
+</ol>
+<p>虽然规则看似简单，但在实际组合中容易出错，例如：</p>
+<ul>
+<li><strong>每隔 2 小时执行一次</strong>，是 <code>* */2 * * *</code> 还是 <code>0 */2 * * *</code>？（答案是后者，前者会每分钟都执行！）</li>
+<li><strong>每周三的下午 5 点</strong>，该怎么写？</li>
+</ul>
+<h2>解决方案：可视化生成器</h2>
+<p>本站工具提供了图形化界面，你不需要手写代码，只需像定闹钟一样点选时间。</p>
+<h3>功能一：可视化配置</h3>
+<p>你只需要在界面上选择：</p>
+<ul>
+<li>“每分钟” / “每小时” / “每天” / “每周” / “每月”</li>
+<li>设置具体的时刻（如：14:30）</li>
+</ul>
+<p>工具会自动在下方生成标准的 Cron 表达式：<code>30 14 * * *</code>，并给出下一次执行的预估时间列表，让你<strong>双重确认</strong>任务是否会按预期执行。</p>
+<h3>功能二：反向解析（人话翻译）</h3>
+<p>接手了别人的服务器，看到 crontab 里写着 <code>0 23 * * 1-5</code>，不敢乱动？</p>
+<p>只需要把这串字符复制到本站工具的输入框中，系统会立刻翻译成人类可读的语言：</p>
+<blockquote>
+<p><strong>“At 23:00 on every day-of-week from Monday through Friday.”</strong>
+(在周一到周五的每天 23:00 执行)</p>
+</blockquote>
+<p>这样你就再也不用担心误删重要的定时任务了。</p>
+<h2>常见 Cron 表达式速查表</h2>
+<p>为了方便大家，这里列出几个最高频使用的表达式，建议收藏：</p>
+<table>
+<thead>
+<tr>
+<th align="left">描述</th>
+<th align="left">表达式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">每分钟执行</td>
+<td align="left"><code>* * * * *</code></td>
+</tr>
+<tr>
+<td align="left">每天凌晨 3 点</td>
+<td align="left"><code>0 3 * * *</code></td>
+</tr>
+<tr>
+<td align="left">每个月 1 号的凌晨 0 点</td>
+<td align="left"><code>0 0 1 * *</code></td>
+</tr>
+<tr>
+<td align="left">每周一早上 8 点</td>
+<td align="left"><code>0 8 * * 1</code></td>
+</tr>
+<tr>
+<td align="left">每隔 10 分钟</td>
+<td align="left"><code>*/10 * * * *</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>立即使用</strong>：拒绝死记硬背，点击使用 👉 <a href="https://888467.xyz/crontab-generator">Crontab 在线生成器</a></p>
+</blockquote>
+</div>
+  
+  <div class="tags">
+    <span class="tag">Linux</span><span class="tag">运维</span><span class="tag">Crontab</span><span class="tag">效率工具</span>
+  </div>
+</body>
+</html>

@@ -20,6 +20,7 @@ interface Article {
   title: string;
   date: string;
   excerpt: string;
+  description?: string;
   tags?: string[];
   image?: string;
   link: string;
