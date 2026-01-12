@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog - 888467.xyz</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f7f7f7;
+        color: #333;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0;
+      }
+      .search {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+        grid-gap: 16px;
+      }
+      .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        display: block;
+      }
+      .card-content {
+        padding: 16px 20px;
+      }
+      .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 8px 0;
+      }
+      .card-excerpt {
+        color: #555;
+        font-size: 14px;
+      }
+      .post-meta {
+        color: #888;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="header container">
+        <h1>Blog</h1>
+        <a href="/">首页</a>
+      </div>
+      <div class="container">
+        <input id="search" class="search" placeholder="搜索文章标题或标签..." />
+        <div id="list" class="grid"></div>
+      </div>
+    </div>
+    <script>
+      fetch('./data/posts.json')
+        .then((r) => r.json())
+        .then((posts) => {
+          const listEl = document.getElementById('list');
+          const searchEl = document.getElementById('search');
+          function render(arr) {
+            listEl.innerHTML = arr
+              .map(
+                (p) => `
+            <div class="card" onclick="location.href='./${p.slug}/'">
+              <img src="${p.image}" alt="" />
+              <div class="card-content">
+                <div class="card-title">${p.title}</div>
+                <div class="card-excerpt">${p.excerpt}</div>
+                <div class="post-meta">
+                  <span>${p.date}</span>${
+                    p.tags && p.tags.length ? `<span style="margin-left:12px">${p.tags.join(', ')}</span>` : ''
+                  }
+                </div>
+              </div>
+            </div>`,
+              )
+              .join('');
+          }
+          render(posts);
+          searchEl.addEventListener('input', () => {
+            const q = searchEl.value.toLowerCase();
+            const filtered = q
+              ? posts.filter(
+                  (p) =>
+                    p.title.toLowerCase().includes(q) || (p.tags && p.tags.some((t) => t.toLowerCase().includes(q))),
+                )
+              : posts;
+            render(filtered);
+          });
+        })
+        .catch(console.error);
+    </script>
+  </body>
+</html>

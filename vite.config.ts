@@ -1,7 +1,8 @@
 import { resolve } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 
-import VueI18n from '@intlify/unplugin-vue-i18n/vite';// 这里保持默认导入
+import VueI18n from '@intlify/unplugin-vue-i18n/vite'; // 这里保持默认导入
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
 import Unocss from 'unocss/vite';
@@ -28,9 +29,7 @@ export default defineConfig({
       compositionOnly: true,
       fullInstall: true,
       strictMessage: false,
-      include: [
-        resolve(__dirname, 'locales/**'),
-      ],
+      include: [resolve(__dirname, 'locales/**')],
     }),
     AutoImport({
       imports: [
@@ -98,7 +97,9 @@ export default defineConfig({
       include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
       resolvers: [NaiveUiResolver(), IconsResolver({ prefix: 'icon' })],
     }),
-    Unocss(),
+    Unocss({
+      inspector: false,
+    }),
   ],
   base: baseUrl,
   resolve: {
@@ -114,5 +115,25 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
+  },
+  server: {
+    configureServer(server) {
+      if (server.httpServer) {
+        server.httpServer.on('request', (req, res) => {
+          const url = req.url || '';
+          if (url.startsWith('/blog/')) {
+            const relativePath = url.replace(/^\/blog\//, '');
+            const slug = relativePath.split('?')[0].split('/')[0];
+            if (slug) {
+              const filePath = resolve(__dirname, 'public', 'blog', slug, 'index.html');
+              if (fs.existsSync(filePath)) {
+                res.setHeader('Content-Type', 'text/html');
+                return fs.createReadStream(filePath).pipe(res);
+              }
+            }
+          }
+        });
+      }
+    },
   },
 });

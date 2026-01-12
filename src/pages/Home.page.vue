@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { IconDragDrop, IconHeart } from '@tabler/icons-vue';
 import { useHead } from '@vueuse/head';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import Draggable from 'vuedraggable';
 import ColoredCard from '../components/ColoredCard.vue';
 import ToolCard from '../components/ToolCard.vue';
+import ArticleCard from '../components/ArticleCard.vue';
 import { useToolStore } from '@/tools/tools.store';
 import { config } from '@/config';
 
@@ -14,6 +15,33 @@ useHead({ title: '出海建站在线工具箱 | 888467.xyz | IT Tools 便捷的�
 const { t } = useI18n();
 
 const favoriteTools = computed(() => toolStore.favoriteTools);
+interface Article {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  tags?: string[];
+  image?: string;
+  link: string;
+}
+const articles = ref<Article[]>([]);
+
+onMounted(async () => {
+  try {
+    const resp = await fetch('/blog/data/posts.json');
+    if (resp.ok) {
+      const list: Article[] = await resp.json();
+      // 取最新 4 篇，按日期倒序
+      articles.value = list
+        .slice()
+        .sort((a: Article, b: Article) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 4)
+        .map((p: Article) => ({ ...p, link: `/blog/${p.slug}` }));
+    }
+  } catch (e) {
+    console.warn('Failed to load blog posts:', e);
+  }
+});
 
 // Update favorite tools order when drag is finished
 function onUpdateFavoriteTools() {
@@ -32,14 +60,16 @@ function onUpdateFavoriteTools() {
             rel="noopener"
             target="_blank"
             :aria-label="$t('home.follow.githubRepository')"
-          >GitHub</a>
+            >GitHub</a
+          >
           {{ $t('home.follow.p2') }}
           <a
             href="https://x.com/ittoolsdottech"
             rel="noopener"
             target="_blank"
             :aria-label="$t('home.follow.twitterXAccount')"
-          >X</a>.
+            >X</a
+          >.
           {{ $t('home.follow.thankYou') }}
           <n-icon :component="IconHeart" />
         </ColoredCard>
@@ -82,6 +112,11 @@ function onUpdateFavoriteTools() {
       <div class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4">
         <ToolCard v-for="tool in toolStore.tools" :key="tool.name" :tool="tool" />
       </div>
+
+      <h3 class="mb-5px mt-25px text-neutral-400 font-500">文章精选</h3>
+      <div class="grid grid-cols-1 gap-12px lg:grid-cols-2 xl:grid-cols-4">
+        <ArticleCard v-for="article in articles" :key="article.title" :article="article" />
+      </div>
     </div>
   </div>
 </template>
@@ -118,7 +153,7 @@ function onUpdateFavoriteTools() {
   }
   100% {
     opacity: 0.4;
-    transform: scale(1.0);
+    transform: scale(1);
   }
 }
 </style>

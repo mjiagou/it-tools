@@ -1,0 +1,72 @@
+name: Deploy Blog
+
+on:
+  push:
+    paths:
+      - 'blog/content/**' # 当 Markdown 文件有变更时触发
+      - 'blog/scripts/**' # 构建脚本变更也触发
+  workflow_dispatch: # 支持手动触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        run: corepack enable pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build blog
+        run: pnpm run script:build-blog
+
+      - name: Build site
+        run: pnpm run build
+
+      - name: Deploy blog static assets
+        run: pnpm run script:deploy-blog
+
+      # 示例：rsync 部署到你的服务器
+      - name: Deploy to server (rsync)
+        if: github.ref == 'refs/heads/main'
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_PATH: ${{ secrets.REMOTE_PATH }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$REMOTE_HOST" >> ~/.ssh/known_hosts
+          rsync -avz --delete dist/ "$REMOTE_USER@$REMOTE_HOST:$REMOTE_PATH"
+
+      # 如果你使用 AWS S3，可用下面模板（请替换 bucket 与 region）
+      # - name: Deploy to S3
+      #   if: github.ref == 'refs/heads/main'
+      #   env:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #   run: |
+      #     aws s3 sync dist/ s3://your-bucket/ --delete --region us-east-1
+
+      # 如果你用 Netlify/Vercel，只需要把 dist 设为站点根目录即可，平台会自动部署
+
+      # 提醒：请在项目 Settings → Secrets and variables → Actions 添加以下 secrets：
+      # - REMOTE_USER
+      # - REMOTE_HOST
+      # - REMOTE_PATH
+      # - SSH_PRIVATE_KEY
+      # - AWS_ACCESS_KEY_ID（如使用 S3）
+      # - AWS_SECRET_ACCESS_KEY（如使用 S3）

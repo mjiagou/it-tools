@@ -22,8 +22,8 @@
     "developer-productivity"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc --noEmit && NODE_OPTIONS=--max_old_space_size=4096 vite build",
+    "dev": "bash scripts/dev.sh",
+    "build": "pnpm run script:build-blog && vue-tsc --noEmit && NODE_OPTIONS=--max_old_space_size=4096 vite build",
     "preview": "vite preview --port 5050",
     "test": "npm run test:unit",
     "test:unit": "vitest --environment jsdom",
@@ -34,6 +34,8 @@
     "lint": "eslint src --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",
     "script:create:tool": "node scripts/create-tool.mjs",
     "script:create:ui": "hygen generator ui-component",
+    "script:build-blog": "node blog/scripts/build.js",
+    "script:deploy-blog": "node scripts/deploy-blog.mjs",
     "release": "node ./scripts/release.mjs"
   },
   "dependencies": {
@@ -124,6 +126,7 @@
     "@types/qrcode": "^1.5.0",
     "@types/ua-parser-js": "^0.7.36",
     "@types/uuid": "^9.0.0",
+    "@unhead/vue": "1.0.0",
     "@unocss/eslint-config": "^0.57.0",
     "@vitejs/plugin-vue": "^4.3.2",
     "@vitejs/plugin-vue-jsx": "^3.0.2",
@@ -131,8 +134,10 @@
     "@vue/runtime-dom": "^3.3.4",
     "@vue/test-utils": "^2.3.2",
     "@vue/tsconfig": "^0.4.0",
+    "@vueuse/shared": "10.9.0",
     "consola": "^3.0.2",
     "eslint": "^8.47.0",
+    "gray-matter": "^4.0.3",
     "hygen": "^6.2.11",
     "jsdom": "^22.0.0",
     "less": "^4.1.3",

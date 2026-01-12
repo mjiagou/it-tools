@@ -5,6 +5,7 @@ import NotFound from './pages/404.page.vue';
 import { tools } from './tools';
 import { config } from './config';
 import { routes as demoRoutes } from './ui/demo/demo.routes';
+import BlogPost from './tools/blog-post/blog-post.vue';
 
 const toolsRoutes = tools.map(({ path, name, component, ...config }) => ({
   path,
@@ -15,7 +16,7 @@ const toolsRoutes = tools.map(({ path, name, component, ...config }) => ({
 const toolsRedirectRoutes = tools
   .filter(({ redirectFrom }) => redirectFrom && redirectFrom.length > 0)
   .flatMap(
-    ({ path, redirectFrom }) => redirectFrom?.map(redirectSource => ({ path: redirectSource, redirect: path })) ?? [],
+    ({ path, redirectFrom }) => redirectFrom?.map((redirectSource) => ({ path: redirectSource, redirect: path })) ?? [],
   );
 
 const router = createRouter({
@@ -30,6 +31,12 @@ const router = createRouter({
       path: '/about',
       name: 'about',
       component: () => import('./pages/About.vue'),
+    },
+    {
+      path: '/blog/:slug(/?)',
+      name: 'blog-post',
+      component: BlogPost,
+      meta: { layout: layouts.toolLayout, name: 'Blog', description: '博客文章页面' },
     },
     ...toolsRoutes,
     ...toolsRedirectRoutes,

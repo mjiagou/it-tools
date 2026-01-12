@@ -1,0 +1,35 @@
+[
+  {
+    "slug": "my-first-post",
+    "title": "我的第一篇博客",
+    "date": "2025-01-12T00:00:00.000Z",
+    "excerpt": "这是用 VS Code 编写的示例文章，将被构建为静态页面，路径为 /blog/my-first-post/",
+    "tags": [
+      "blog",
+      "example"
+    ],
+    "image": "https://picsum.photos/seed/my-first-post/600/360"
+  },
+  {
+    "slug": "my-set-post",
+    "title": "我的第二篇博客",
+    "date": "2026-01-11T00:00:00.000Z",
+    "excerpt": "这是用 VS Code 编写的示例文章，将被构建为静态页面，路径为 /blog/my-set-post/",
+    "tags": [
+      "blog",
+      "example"
+    ],
+    "image": "https://picsum.photos/seed/my-set-post/600/360"
+  },
+  {
+    "slug": "vue-tips",
+    "title": "Vue 3 实用技巧",
+    "date": "2025-01-11T00:00:00.000Z",
+    "excerpt": "分享几个日常开发中提升效率的 Vue 3 小技巧。",
+    "tags": [
+      "vue",
+      "frontend"
+    ],
+    "image": "https://picsum.photos/seed/vue-tips/600/360"
+  }
+]

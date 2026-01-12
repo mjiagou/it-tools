@@ -22,7 +22,10 @@ const head = computed<HeadObject>(() => ({
     },
   ],
 }));
-useHead(head);
+// 博客文章页面自己会设置动态 title，这里跳过默认的 useHead
+if (route.meta.name !== 'Blog') {
+  useHead(head);
+}
 const { t } = useI18n();
 
 const i18nKey = computed<string>(() => route.path.trim().replace('/', ''));

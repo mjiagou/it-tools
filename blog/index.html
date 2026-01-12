@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog - 888467.xyz</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f7f7f7;
+        color: #333;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-gap: 16px;
+      }
+      .grid.cols-1 {
+        grid-template-columns: repeat(1, 1fr);
+      }
+      .grid.cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+      .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        display: block;
+      }
+      .card-content {
+        padding: 12px 14px;
+      }
+      .card-title {
+        font-size: 18px;
+        margin: 6px 0;
+      }
+      .card-excerpt {
+        color: #555;
+        font-size: 14px;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .back {
+        margin: 12px 0;
+        display: inline-block;
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      input.search {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        font-size: 14px;
+        margin-bottom: 20px;
+        box-sizing: border-box;
+      }
+      .post-meta {
+        color: #888;
+        font-size: 12px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container"></div>
+    <script type="module">
+      import { createApp, ref, computed } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+      import { marked } from 'https://unpkg.com/marked@11/marked.esm.js';
+
+      async function loadPosts() {
+        const res = await fetch('./data/posts.json');
+        const data = await res.json();
+        // Convert markdown to HTML on load for future render
+        return data.map((post) => {
+          const contentHtml = post.contentMarkdown ? marked.parse(post.contentMarkdown) : post.content || '';
+          const excerptHtml = post.excerptMarkdown ? marked.parseInline(post.excerptMarkdown) : post.excerpt || '';
+          return { ...post, contentHtml, excerptHtml };
+        });
+      }
+
+      const App = {
+        setup() {
+          const posts = ref([]);
+          const view = ref('list');
+          const currentPost = ref(null);
+          const query = ref('');
+
+          loadPosts().then((data) => {
+            posts.value = data;
+          });
+
+          const filteredPosts = computed(() => {
+            if (!query.value.trim()) return posts.value;
+            const q = query.value.toLowerCase();
+            return posts.value.filter(
+              (p) =>
+                p.title.toLowerCase().includes(q) ||
+                p.excerpt.toLowerCase().includes(q) ||
+                (p.tags && p.tags.some((t) => t.toLowerCase().includes(q))),
+            );
+          });
+
+          function viewPost(post) {
+            currentPost.value = post;
+            view.value = 'post';
+            window.location.hash = '#/post/' + (post.slug || post.id);
+          }
+          function backToList() {
+            view.value = 'list';
+            currentPost.value = null;
+            window.location.hash = '';
+            query.value = '';
+          }
+
+          // Simple hash-based routing
+          function handleHashChange() {
+            const hash = window.location.hash.slice(1);
+            if (hash.startsWith('/post/')) {
+              const slugOrId = hash.replace('/post/', '');
+              const post = posts.value.find((p) => (p.slug && p.slug === slugOrId) || String(p.id) === slugOrId);
+              if (post) {
+                viewPost(post);
+              }
+            } else {
+              backToList();
+            }
+          }
+
+          window.addEventListener('hashchange', handleHashChange);
+          // initial
+          setTimeout(handleHashChange, 0);
+
+          return { posts: filteredPosts, view, currentPost, query, viewPost, backToList };
+        },
+        template: `
+        <div>
+          <div class="header container">
+            <h1>Blog</h1>
+            <a href="/">首页</a>
+          </div>
+          <div class="container">
+            <div v-if="view === 'list'">
+              <input v-model="query" class="search" placeholder="搜索文章标题或标签..." />
+              <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));">
+                <div v-for="p in posts" :key="p.id" class="card" @click="viewPost(p)" style="cursor: pointer;">
+                  <img v-if="p.image" :src="p.image" alt="" />
+                  <div class="card-content">
+                    <div class="card-title">{{ p.title }}</div>
+                    <div class="card-excerpt" v-html="p.excerptHtml || p.excerpt"></div>
+                    <div class="post-meta">
+                      <span>{{ p.date }}</span>
+                      <span v-if="p.tags && p.tags.length" style="margin-left:12px">{{ p.tags.join(', ') }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              <button class="back" @click="backToList">返回列表</button>
+              <div class="card" style="padding:0">
+                <img v-if="currentPost.image" :src="currentPost.image" alt="" />
+                <div class="card-content">
+                  <h2 class="card-title" style="font-size:22px; margin-top:0;">{{ currentPost.title }}</h2>
+                  <div class="post-meta">{{ currentPost.date }}</div>
+                  <div style="margin-top:20px; line-height:1.6; font-size:15px;" v-html="currentPost.contentHtml || currentPost.content"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      };
+
+      createApp(App).mount('#app');
+    </script>
+  </body>
+</html>
