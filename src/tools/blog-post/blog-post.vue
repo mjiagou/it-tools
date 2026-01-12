@@ -23,7 +23,7 @@ onMounted(async () => {
       throw new Error('Post not found');
     }
     post.value = found;
-    const htmlResp = await fetch(`/blog/${slug}/index.html`);
+    const htmlResp = await fetch(`/blog/${slug}`);
     if (!htmlResp.ok) {
       throw new Error('Post page not found');
     }
