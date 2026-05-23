@@ -7,6 +7,10 @@ interface ImportMetaEnv {
   PACKAGE_VERSION: string;
   GIT_SHORT_SHA: string;
   PROD: boolean;
+  VITE_VERCEL_ENV?: string;
+  VITE_VERCEL_GIT_COMMIT_SHA?: string;
+  CF_PAGES_ENV?: string;
+  CF_PAGES_COMMIT_SHA?: string;
 }
 
 interface ImportMeta {

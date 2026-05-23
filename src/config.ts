@@ -1,5 +1,12 @@
 import { figue } from 'figue';
 
+const environment = {
+  ...import.meta.env,
+  PACKAGE_VERSION: import.meta.env.PACKAGE_VERSION,
+  VITE_VERCEL_ENV: import.meta.env.VITE_VERCEL_ENV ?? import.meta.env.CF_PAGES_ENV ?? import.meta.env.MODE,
+  VITE_VERCEL_GIT_COMMIT_SHA: import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA ?? import.meta.env.CF_PAGES_COMMIT_SHA,
+};
+
 export const config = figue({
   app: {
     version: {
@@ -24,7 +31,7 @@ export const config = figue({
       doc: 'Application current env',
       format: 'enum',
       values: ['production', 'development', 'preview', 'test'],
-      default: 'development',
+      default: import.meta.env.MODE ?? 'development',
       env: 'VITE_VERCEL_ENV',
     },
   },
@@ -66,10 +73,6 @@ export const config = figue({
     env: 'VITE_SHOW_SPONSOR_BANNER',
   },
 })
-  .loadEnv({
-    ...import.meta.env,
-    // Because the string 'import.meta.env.PACKAGE_VERSION' is statically replaced during build time (see 'define' in vite.config.ts)
-    PACKAGE_VERSION: import.meta.env.PACKAGE_VERSION,
-  })
+  .loadEnv(environment)
   .validate()
   .getConfig();
