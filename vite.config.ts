@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { resolve } from 'node:path';
 import { URL, fileURLToPath } from 'node:url';
 
@@ -16,20 +17,22 @@ import markdown from 'vite-plugin-vue-markdown';
 import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
 
+const VueI18nPlugin = (VueI18n as any).default ?? VueI18n;
+const markdownPlugin = (markdown as any).default ?? markdown;
+const ComponentsPlugin = (Components as any).default ?? Components;
+
 const baseUrl = process.env.BASE_URL ?? '/';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    VueI18n({
+    VueI18nPlugin({
       runtimeOnly: true,
       jitCompilation: true,
       compositionOnly: true,
       fullInstall: true,
       strictMessage: false,
-      include: [
-        resolve(__dirname, 'locales/**'),
-      ],
+      include: [resolve(__dirname, 'locales/**')],
     }),
     AutoImport({
       imports: [
@@ -51,7 +54,7 @@ export default defineConfig({
       include: [/\.vue$/, /\.md$/],
     }),
     vueJsx(),
-    markdown(),
+    markdownPlugin(),
     svgLoader(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -90,7 +93,7 @@ export default defineConfig({
         ],
       },
     }),
-    Components({
+    ComponentsPlugin({
       dirs: ['src/'],
       extensions: ['vue', 'md'],
       include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
@@ -104,6 +107,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  envPrefix: ['VITE_', 'CF_PAGES_'],
   define: {
     'import.meta.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version),
   },
