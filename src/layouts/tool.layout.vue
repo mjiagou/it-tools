@@ -8,26 +8,63 @@ import FavoriteButton from '@/components/FavoriteButton.vue';
 import type { Tool } from '@/tools/tools.types';
 
 const route = useRoute();
-
-const head = computed<HeadObject>(() => ({
-  title: `${route.meta.name} - IT Tools`,
-  meta: [
-    {
-      name: 'description',
-      content: route.meta?.description as string,
-    },
-    {
-      name: 'keywords',
-      content: ((route.meta.keywords ?? []) as string[]).join(','),
-    },
-  ],
-}));
-useHead(head);
 const { t } = useI18n();
 
 const i18nKey = computed<string>(() => route.path.trim().replace('/', ''));
 const toolTitle = computed<string>(() => t(`tools.${i18nKey.value}.title`, String(route.meta.name)));
 const toolDescription = computed<string>(() => t(`tools.${i18nKey.value}.description`, String(route.meta.description)));
+
+const head = computed<HeadObject>(() => {
+  const currentTitle = toolTitle.value && toolTitle.value !== route.meta.name
+    ? `${toolTitle.value} (${route.meta.name}) - IT Tools`
+    : `${route.meta.name} - IT Tools`;
+  const currentDesc = toolDescription.value || (route.meta?.description as string) || '';
+  const canonicalUrl = `https://888467.xyz${route.path}`;
+  const keywords = Array.isArray(route.meta.keywords)
+    ? (route.meta.keywords as string[]).join(',')
+    : '';
+
+  return {
+    title: currentTitle,
+    meta: [
+      {
+        name: 'description',
+        content: currentDesc,
+      },
+      {
+        name: 'keywords',
+        content: keywords,
+      },
+      {
+        property: 'og:title',
+        content: currentTitle,
+      },
+      {
+        property: 'og:description',
+        content: currentDesc,
+      },
+      {
+        property: 'og:url',
+        content: canonicalUrl,
+      },
+      {
+        name: 'twitter:title',
+        content: currentTitle,
+      },
+      {
+        name: 'twitter:description',
+        content: currentDesc,
+      },
+    ],
+    link: [
+      {
+        rel: 'canonical',
+        href: canonicalUrl,
+      },
+    ],
+  };
+});
+useHead(head);
 </script>
 
 <template>

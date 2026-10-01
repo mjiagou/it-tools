@@ -1,0 +1,11 @@
+# Cloudflare Pages Redirects
+/file-to-base64  /base64-string-converter  301
+/base64-converter  /base64-string-converter  301
+/color-picker-converter  /color-converter  301
+/cypher  /encryption  301
+/hash  /hash-text  301
+/json-viewer  /json-prettify  301
+/text-stats  /text-statistics  301
+
+# Cloudflare Pages SPA fallback
+/*  /index.html  200

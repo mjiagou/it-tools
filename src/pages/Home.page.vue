@@ -10,8 +10,47 @@ import { config } from '@/config';
 
 const toolStore = useToolStore();
 
-useHead({ title: 'IT Tools - Handy online tools for developers' });
 const { t } = useI18n();
+
+useHead({
+  title: 'IT Tools - 在线开发人员实用工具箱 | Free Online Developer Tools',
+  meta: [
+    {
+      name: 'description',
+      content: 'IT Tools (888467.xyz) 是一个为开发者和IT从业人员打造的免费、极速、开箱即用的在线工具箱。包含 Base64 编码解码、JSON 格式化校验、JWT 解析、时间戳转换、Cron 表达式生成、哈希散列等近百种实用开发工具。',
+    },
+    {
+      name: 'keywords',
+      content: 'IT Tools, 在线工具箱, 开发人员工具, 开发者工具, Base64转换, JSON格式化, JWT解析, 时间戳转换, Cron表达式, 正则表达式, 哈希计算, UUID生成器, developer tools, online tools',
+    },
+    {
+      property: 'og:title',
+      content: 'IT Tools - 在线开发人员实用工具箱 | Free Online Developer Tools',
+    },
+    {
+      property: 'og:description',
+      content: 'IT Tools (888467.xyz) 是一个为开发者和IT从业人员打造的免费、极速、开箱即用的在线工具箱。',
+    },
+    {
+      property: 'og:url',
+      content: 'https://888467.xyz/',
+    },
+    {
+      name: 'twitter:title',
+      content: 'IT Tools - 在线开发人员实用工具箱 | Free Online Developer Tools',
+    },
+    {
+      name: 'twitter:description',
+      content: 'IT Tools (888467.xyz) 是一个为开发者和IT从业人员打造的免费、极速、开箱即用的在线工具箱。',
+    },
+  ],
+  link: [
+    {
+      rel: 'canonical',
+      href: 'https://888467.xyz/',
+    },
+  ],
+});
 
 const favoriteTools = computed(() => toolStore.favoriteTools);
 
