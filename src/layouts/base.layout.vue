@@ -2,7 +2,7 @@
 import { NIcon, useThemeVars } from 'naive-ui';
 
 import { RouterLink } from 'vue-router';
-import { Heart, Home2, Menu2 } from '@vicons/tabler';
+import { FileText, Heart, Home2, Menu2 } from '@vicons/tabler';
 
 import { storeToRefs } from 'pinia';
 import HeroGradient from '../assets/hero-gradient.svg?component';
@@ -55,6 +55,17 @@ const tools = computed<ToolCategory[]>(() => [
           <div flex justify-center>
             <NavbarButtons />
           </div>
+        </div>
+
+        <div class="px-12px pb-4px pt-8px">
+          <RouterLink
+            to="/articles"
+            class="flex items-center gap-10px rounded-6px px-12px py-8px text-14px text-neutral-700 decoration-none transition hover:bg-neutral-200/60 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            active-class="bg-primary/10 !text-primary font-500"
+          >
+            <NIcon size="20" :component="FileText" />
+            <span>{{ $t('home.nav.articles', '技术文章') }}</span>
+          </RouterLink>
         </div>
 
         <CollapsibleToolMenu :tools-by-category="tools" />

@@ -28,6 +28,9 @@ coverage
 *.sw?
 
 .env
+.env.*
+!.env.example
+.r2-upload-cache.json
 /test-results/
 /playwright-report/
 /playwright/.cache/

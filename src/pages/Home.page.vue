@@ -5,6 +5,8 @@ import { computed } from 'vue';
 import Draggable from 'vuedraggable';
 import ColoredCard from '../components/ColoredCard.vue';
 import ToolCard from '../components/ToolCard.vue';
+import ArticleCard from '../components/ArticleCard.vue';
+import { allArticles } from '@/articles/articles.service';
 import { useToolStore } from '@/tools/tools.store';
 import { config } from '@/config';
 
@@ -53,6 +55,7 @@ useHead({
 });
 
 const favoriteTools = computed(() => toolStore.favoriteTools);
+const latestArticles = computed(() => allArticles.slice(0, 4));
 
 // Update favorite tools order when drag is finished
 function onUpdateFavoriteTools() {
@@ -112,6 +115,20 @@ function onUpdateFavoriteTools() {
         </h3>
         <div class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4">
           <ToolCard v-for="tool in toolStore.newTools" :key="tool.name" :tool="tool" />
+        </div>
+      </div>
+
+      <div v-if="latestArticles.length > 0">
+        <div class="mb-8px mt-25px flex items-center justify-between">
+          <h3 class="m-0 text-neutral-400 font-500">
+            {{ $t('home.categories.latestArticles', '最新文章') }}
+          </h3>
+          <router-link to="/articles" class="text-13px text-primary decoration-none hover:underline">
+            {{ $t('articles.viewAll', '查看全部 →') }}
+          </router-link>
+        </div>
+        <div class="grid grid-cols-1 gap-12px lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 xl:grid-cols-4">
+          <ArticleCard v-for="article in latestArticles" :key="article.slug" :article="article" />
         </div>
       </div>
 

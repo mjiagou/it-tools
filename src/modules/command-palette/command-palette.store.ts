@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import _ from 'lodash';
+import { IconArticle } from '@tabler/icons-vue';
 import type { PaletteOption } from './command-palette.types';
+import { allArticles } from '@/articles/articles.service';
 import { useToolStore } from '@/tools/tools.store';
 import { useFuzzySearch } from '@/composable/fuzzySearch';
 import { useStyleStore } from '@/stores/style.store';
@@ -24,8 +26,18 @@ export const useCommandPaletteStore = defineStore('command-palette', () => {
     category: 'Tools',
   }));
 
+  const articlesOptions: PaletteOption[] = allArticles.map(article => ({
+    name: article.title,
+    description: article.description,
+    to: article.path,
+    category: 'Articles',
+    keywords: [...article.tags, 'article', 'blog', '文章', '教程'],
+    icon: IconArticle,
+  }));
+
   const searchOptions: PaletteOption[] = [
     ...toolsOptions,
+    ...articlesOptions,
     {
       name: 'Random tool',
       description: 'Get a random tool from the list.',
@@ -61,6 +73,14 @@ export const useCommandPaletteStore = defineStore('command-palette', () => {
       category: 'Actions',
       keywords: ['report', 'issue', 'bug', 'problem', 'error'],
       icon: BugIcon,
+    },
+    {
+      name: 'Articles / 技术文章',
+      description: '阅读开发者实用技术文章与指南',
+      to: '/articles',
+      category: 'Pages',
+      keywords: ['articles', 'blog', 'posts', '文章', '博客', '教程'],
+      icon: IconArticle,
     },
     {
       name: 'About',

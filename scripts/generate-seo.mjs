@@ -67,6 +67,86 @@ for (const dir of toolDirs) {
 
 console.log(`Discovered ${tools.length} tools and ${redirects.length} redirect rules.`);
 
+// 2b. Discover all Markdown articles in content/articles
+function collectArticleFiles(dir) {
+  if (!fs.existsSync(dir)) {
+    return [];
+  }
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectArticleFiles(full));
+    }
+    else if (entry.isFile() && entry.name.endsWith('.md') && entry.name.toLowerCase() !== 'readme.md') {
+      files.push(full);
+    }
+  }
+  return files;
+}
+
+const articlesRoot = path.join(rootDir, 'content/articles');
+const articles = [];
+
+for (const filePath of collectArticleFiles(articlesRoot)) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const fmMatch = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  const fm = fmMatch ? (YAML.parse(fmMatch[1]) || {}) : {};
+  const body = fmMatch ? fmMatch[2] : raw;
+
+  if (fm.draft === true) {
+    continue;
+  }
+
+  const relPath = path.relative(articlesRoot, filePath).replace(/\\/g, '/');
+  const defaultSlug = relPath.toLowerCase().endsWith('/index.md')
+    ? relPath.slice(0, -'/index.md'.length).replace(/\//g, '-')
+    : relPath.replace(/\.md$/i, '').replace(/\//g, '-');
+  const slug = String(fm.slug || defaultSlug).trim();
+
+  const headingMatch = body.match(/^\s*#\s+(.+?)\s*$/m);
+  const title = String(fm.title || headingMatch?.[1] || slug).trim();
+
+  const plainBody = body
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~`>|]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const desc = String(fm.description || plainBody.slice(0, 150)).trim();
+  const rawDate = fm.date instanceof Date ? fm.date.toISOString().split('T')[0] : String(fm.date || '').trim();
+  const dateMatch = rawDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const date = dateMatch ? `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}` : new Date().toISOString().split('T')[0];
+
+  const tags = Array.isArray(fm.tags)
+    ? fm.tags.map(t => String(t).trim()).filter(Boolean)
+    : fm.tags
+      ? String(fm.tags).split(/[,，]/).map(t => t.trim()).filter(Boolean)
+      : [];
+
+  const mdImgMatch = body.match(/!\[[^\]]*\]\((?:<([^>\n]+)>|([^\s)\n]+))/);
+  const firstImg = mdImgMatch ? (mdImgMatch[1] || mdImgMatch[2] || '').trim() : '';
+  const cover = String(fm.cover || fm.image || firstImg || '').trim();
+
+  articles.push({
+    slug,
+    path: `/articles/${slug}`,
+    title,
+    desc,
+    date,
+    tags,
+    cover,
+    excerpt: plainBody.slice(0, 500),
+  });
+}
+
+articles.sort((a, b) => b.date.localeCompare(a.date));
+console.log(`Discovered ${articles.length} published articles.`);
+
 // 3. Generate robots.txt
 const robotsTxt = `User-agent: *
 Allow: /
@@ -96,12 +176,20 @@ if (fs.existsSync(distDir)) {
 const today = new Date().toISOString().split('T')[0];
 
 const sitemapUrls = [
-  { loc: `${BASE_URL}/`, priority: '1.0', changefreq: 'daily' },
-  { loc: `${BASE_URL}/about`, priority: '0.5', changefreq: 'monthly' },
+  { loc: `${BASE_URL}/`, priority: '1.0', changefreq: 'daily', lastmod: today },
+  { loc: `${BASE_URL}/articles`, priority: '0.9', changefreq: 'daily', lastmod: articles[0]?.date || today },
+  { loc: `${BASE_URL}/about`, priority: '0.5', changefreq: 'monthly', lastmod: today },
+  ...articles.map(a => ({
+    loc: `${BASE_URL}${a.path}`,
+    priority: '0.8',
+    changefreq: 'monthly',
+    lastmod: a.date || today,
+  })),
   ...tools.map(t => ({
     loc: `${BASE_URL}${t.path}`,
     priority: '0.8',
     changefreq: 'weekly',
+    lastmod: today,
   })),
 ];
 
@@ -111,7 +199,7 @@ ${sitemapUrls
   .map(
     u => `  <url>
     <loc>${u.loc}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${u.lastmod || today}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
   </url>`,
@@ -149,6 +237,63 @@ if (fs.existsSync(distIndexHtmlPath)) {
     heading: aboutTitle,
   });
   fs.writeFileSync(path.join(aboutDir, 'index.html'), aboutHtml);
+
+  // Generate /articles/index.html
+  const articlesIndexDir = path.join(distDir, 'articles');
+  fs.mkdirSync(articlesIndexDir, { recursive: true });
+  const articlesListTitle = '技术文章与实用指南 - IT Tools 在线工具箱';
+  const articlesListDesc = 'IT Tools (888467.xyz) 技术文章专栏，分享开发者工具使用技巧、编码解码原理解析、正则表达式与日常开发效率指南。';
+  const articlesListHtml = injectSeoTags(indexHtmlTemplate, {
+    title: articlesListTitle,
+    desc: articlesListDesc,
+    canonical: `${BASE_URL}/articles`,
+    keywords: 'IT Tools, 技术文章, 开发指南, 在线工具教程, 888467.xyz',
+    heading: articlesListTitle,
+  });
+  fs.writeFileSync(path.join(articlesIndexDir, 'index.html'), articlesListHtml);
+
+  // Generate HTML for each article
+  for (const a of articles) {
+    const articleTargetDir = path.join(distDir, 'articles', a.slug);
+    fs.mkdirSync(articleTargetDir, { recursive: true });
+
+    const pageTitle = `${a.title} - IT Tools`;
+    const canonical = `${BASE_URL}${a.path}`;
+    const ogImage = a.cover && /^https?:\/\//i.test(a.cover) ? a.cover : `${BASE_URL}/banner.png`;
+    const allKeywords = [...a.tags, 'IT Tools', '技术文章', '888467.xyz'].filter(Boolean).join(', ');
+
+    const articleJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      'headline': a.title,
+      'description': a.desc,
+      'datePublished': a.date,
+      'image': ogImage,
+      'url': canonical,
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'IT Tools',
+        'url': BASE_URL,
+      },
+    };
+
+    const articleHtml = injectSeoTags(indexHtmlTemplate, {
+      title: pageTitle,
+      desc: a.desc,
+      canonical,
+      keywords: allKeywords,
+      jsonLd: articleJsonLd,
+      heading: a.title,
+      ogImage,
+      ogType: 'article',
+      extraSemanticText: a.excerpt,
+    });
+
+    fs.writeFileSync(path.join(articleTargetDir, 'index.html'), articleHtml);
+  }
+  if (articles.length > 0) {
+    console.log(`Generated ${articles.length} static article pages for instant crawler indexing!`);
+  }
 
   // Generate HTML for each tool
   let generatedPages = 0;
@@ -201,8 +346,9 @@ if (fs.existsSync(distIndexHtmlPath)) {
   console.log(`Generated ${generatedPages} static tool pages for instant crawler indexing!`);
 }
 
-function injectSeoTags(template, { title, desc, canonical, keywords, jsonLd, heading }) {
+function injectSeoTags(template, { title, desc, canonical, keywords, jsonLd, heading, ogImage, ogType, extraSemanticText }) {
   let html = template;
+  const resolvedOgImage = ogImage || `${BASE_URL}/banner.png`;
 
   // Replace original domain
   html = html.replaceAll('https://it-tools.tech', BASE_URL);
@@ -229,15 +375,18 @@ function injectSeoTags(template, { title, desc, canonical, keywords, jsonLd, hea
   html = html.replace(/<link[^>]*?rel="canonical"[^>]*?>/i, `<link rel="canonical" href="${canonical}" />`);
 
   // Replace OpenGraph
+  if (ogType) {
+    html = html.replace(/<meta[^>]*?property="og:type"[^>]*?>/i, `<meta property="og:type" content="${escapeAttr(ogType)}" />`);
+  }
   html = html.replace(/<meta[^>]*?property="og:url"[^>]*?>/i, `<meta property="og:url" content="${canonical}" />`);
   html = html.replace(/<meta[^>]*?property="og:title"[^>]*?>/i, `<meta property="og:title" content="${escapeAttr(title)}" />`);
   html = html.replace(/<meta[^>]*?property="og:description"[^>]*?>/i, `<meta property="og:description" content="${escapeAttr(desc)}" />`);
-  html = html.replace(/<meta[^>]*?property="og:image"[^>]*?>/i, `<meta property="og:image" content="${BASE_URL}/banner.png" />`);
+  html = html.replace(/<meta[^>]*?property="og:image"[^>]*?>/i, `<meta property="og:image" content="${escapeAttr(resolvedOgImage)}" />`);
 
   // Replace Twitter
   html = html.replace(/<meta[^>]*?name="twitter:title"[^>]*?>/i, `<meta name="twitter:title" content="${escapeAttr(title)}" />`);
   html = html.replace(/<meta[^>]*?name="twitter:description"[^>]*?>/i, `<meta name="twitter:description" content="${escapeAttr(desc)}" />`);
-  html = html.replace(/<meta[^>]*?name="twitter:image"[^>]*?>/i, `<meta name="twitter:image" content="${BASE_URL}/banner.png" />`);
+  html = html.replace(/<meta[^>]*?name="twitter:image"[^>]*?>/i, `<meta name="twitter:image" content="${escapeAttr(resolvedOgImage)}" />`);
 
   // Inject JSON-LD before </head>
   if (jsonLd) {
@@ -246,7 +395,8 @@ function injectSeoTags(template, { title, desc, canonical, keywords, jsonLd, hea
   }
 
   // Inject semantic content inside #app for bots
-  const semanticBody = `<div id="app"><div class="seo-crawler-content" style="opacity:0.001;position:absolute;pointer-events:none;"><h1>${escapeHtml(heading || title)}</h1><p>${escapeHtml(desc)}</p><p>${escapeHtml(keywords || '')}</p></div></div>`;
+  const extraP = extraSemanticText ? `<p>${escapeHtml(extraSemanticText)}</p>` : '';
+  const semanticBody = `<div id="app"><div class="seo-crawler-content" style="opacity:0.001;position:absolute;pointer-events:none;"><h1>${escapeHtml(heading || title)}</h1><p>${escapeHtml(desc)}</p>${extraP}<p>${escapeHtml(keywords || '')}</p></div></div>`;
   html = html.replace(/<div id="app">[\s\S]*?<\/div>/, semanticBody);
 
   return html;

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 260" width="840" height="260">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+  </defs>
+  <rect width="840" height="260" rx="16" fill="url(#bg)" />
+  <text x="420" y="44" text-anchor="middle" fill="#f8fafc" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700">
+    JWT (JSON Web Token) 三段式结构解析 — 888467.xyz
+  </text>
+
+  <rect x="40" y="75" width="230" height="140" rx="12" fill="#ef4444" fill-opacity="0.16" stroke="#ef4444" stroke-width="2" />
+  <text x="155" y="110" text-anchor="middle" fill="#fca5a5" font-family="monospace" font-size="17" font-weight="700">1. Header (头部)</text>
+  <text x="155" y="142" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">{"alg": "HS256", "typ": "JWT"}</text>
+  <text x="155" y="175" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">Base64Url 编码算法与类型</text>
+
+  <circle cx="285" cy="145" r="5" fill="#18a058" />
+
+  <rect x="305" y="75" width="230" height="140" rx="12" fill="#a855f7" fill-opacity="0.16" stroke="#a855f7" stroke-width="2" />
+  <text x="420" y="110" text-anchor="middle" fill="#d8b4fe" font-family="monospace" font-size="17" font-weight="700">2. Payload (载荷)</text>
+  <text x="420" y="142" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">{"sub": "1024", "exp": 1793456}</text>
+  <text x="420" y="175" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">用户声明与过期时间戳</text>
+
+  <circle cx="550" cy="145" r="5" fill="#18a058" />
+
+  <rect x="570" y="75" width="230" height="140" rx="12" fill="#18a058" fill-opacity="0.2" stroke="#18a058" stroke-width="2" />
+  <text x="685" y="110" text-anchor="middle" fill="#86efac" font-family="monospace" font-size="17" font-weight="700">3. Signature (签名)</text>
+  <text x="685" y="142" text-anchor="middle" fill="#e2e8f0" font-family="monospace" font-size="13">HMACSHA256(h + "." + p, key)</text>
+  <text x="685" y="175" text-anchor="middle" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="12">防止篡改的加密签名校验</text>
+</svg>
+

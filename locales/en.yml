@@ -3,6 +3,7 @@ home:
     newestTools: Newest tools
     favoriteTools: 'Your favorite tools'
     allTools: 'All the tools'
+    latestArticles: 'Latest articles'
     favoritesDndToolTip: 'Drag and drop to reorder favorites'
   subtitle: 'Handy tools for developers'
   toggleMenu: 'Toggle menu'
@@ -24,6 +25,8 @@ home:
     twitterXAccount: 'IT Tools X account'
     about: 'About  IT-Tools'
     aboutLabel: 'About'
+    articles: 'Articles & Guides'
+    articlesLabel: 'Articles'
     darkMode: 'Dark mode'
     lightMode: 'Light mode'
     mode: 'Toggle dark/light mode'
@@ -57,6 +60,22 @@ toolCard:
   new: New
 search:
   label: Search
+articles:
+  pageTitle: 'Articles & Developer Guides'
+  pageDescription: 'Developer tutorials, encoding/decoding deep dives, and practical productivity guides on IT Tools (888467.xyz).'
+  heading: 'Articles & Guides'
+  subheading: 'Practical developer guides, debugging tips, and deep dives into everyday tools'
+  allTags: 'All'
+  searchPlaceholder: 'Search articles or tags...'
+  empty: 'No matching articles found'
+  readingTime: '{min} min read'
+  backToList: 'Back to articles'
+  prevArticle: 'Previous'
+  nextArticle: 'Next'
+  toc: 'On this page'
+  viewAll: 'View all →'
+  notFound: 'Article not found'
+  notFoundDesc: 'The article may have been moved or the link is invalid.'
 tools:
   categories:
     favorite-tools: 'Your favorite tools'

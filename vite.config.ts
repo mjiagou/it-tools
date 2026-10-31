@@ -12,10 +12,12 @@ import Icons from 'unplugin-icons/vite';
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import markdown from 'vite-plugin-vue-markdown';
 import svgLoader from 'vite-svg-loader';
 import { configDefaults } from 'vitest/config';
+import { processAllMarkdownFiles, processMarkdownFile } from './scripts/r2-uploader.mjs';
 
 const VueI18nPlugin = (VueI18n as any).default ?? VueI18n;
 const markdownPlugin = (markdown as any).default ?? markdown;
@@ -23,9 +25,64 @@ const ComponentsPlugin = (Components as any).default ?? Components;
 
 const baseUrl = process.env.BASE_URL ?? '/';
 
+function r2MarkdownImagesPlugin(): Plugin {
+  let isBuild = false;
+  const activeFiles = new Set<string>();
+
+  return {
+    name: 'vite-plugin-r2-markdown-images',
+    enforce: 'pre',
+    configResolved(resolvedConfig) {
+      isBuild = resolvedConfig.command === 'build';
+    },
+    async buildStart() {
+      if (!isBuild || process.env.SKIP_VITE_R2_UPLOAD === '1') {
+        return;
+      }
+      await processAllMarkdownFiles();
+    },
+    configureServer(server) {
+      const contentDir = resolve(__dirname, 'content');
+      const srcDir = resolve(__dirname, 'src');
+      server.watcher.add(contentDir);
+
+      // Initial non-blocking scan on dev server startup
+      processAllMarkdownFiles().catch((err) => {
+        console.warn('[r2-upload] Dev 初始扫描异常:', err);
+      });
+
+      const onFileChange = async (filePath: string) => {
+        if (!filePath.endsWith('.md') || filePath.toLowerCase().endsWith('readme.md')) {
+          return;
+        }
+        if (!filePath.startsWith(contentDir) && !filePath.startsWith(srcDir)) {
+          return;
+        }
+        if (activeFiles.has(filePath)) {
+          return;
+        }
+        activeFiles.add(filePath);
+        try {
+          await processMarkdownFile(filePath);
+        }
+        catch (err) {
+          console.warn(`[r2-upload] 处理文件异常 (${filePath}):`, err);
+        }
+        finally {
+          setTimeout(() => activeFiles.delete(filePath), 300);
+        }
+      };
+
+      server.watcher.on('add', onFileChange);
+      server.watcher.on('change', onFileChange);
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    r2MarkdownImagesPlugin(),
     VueI18nPlugin({
       runtimeOnly: true,
       jitCompilation: true,
@@ -52,9 +109,12 @@ export default defineConfig({
     Icons({ compiler: 'vue3' }),
     vue({
       include: [/\.vue$/, /\.md$/],
+      exclude: [/content\/articles\//],
     }),
     vueJsx(),
-    markdownPlugin(),
+    markdownPlugin({
+      exclude: [/content\/articles\//],
+    }),
     svgLoader(),
     VitePWA({
       registerType: 'autoUpdate',
